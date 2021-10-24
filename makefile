@@ -1,28 +1,28 @@
 CC      := gcc
 INC     := -I"./include"
 CFLAGS  := -O -Wall -pthread $(INC)
+
 SRC 	:= ./src
-SRCS 	:= $(wildcard *.c $(SRC)/*.c)
+SRCS    := $(shell find $(SRC) -name '*.c')
+
 OBJ 	:= ./obj
-OBJS 	:= $(patsubst $(SRC)/%.c,$(OBJ)/%.o,$(SRCS))
+OBJS    := $(SRCS:%.c=%.o)
+
 BIN 	:= main
 LDLIBS	:= -lm
-
 MKDIR   := mkdir
 RMDIR   := rmdir
 
-all:$(OBJS)
+all:$(OBJS) 
 	$(CC) -o $(BIN) $^ $(CFLAGS) $(LDLIBS)
 	@echo make target [$@] is complete
 
-$(OBJ)/%.o: $(SRC)/%.c | $(OBJ)
-	$(CC) -o $@ -c $< $(CFLAGS)
+%o: %c
+	$(CC) -c $< -o $@ $(CFLAGS) 
 	@echo make target [$@] is complete
 
-$(OBJ):
-	$(MKDIR) $(OBJ)
-
 clean:
-	-rm -f $(BIN)
-	-rm -r $(OBJ)
+	-rm -f $(BIN) $(OBJS)
+
+
 
