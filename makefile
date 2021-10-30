@@ -17,7 +17,7 @@ all:$(OBJS)
 	$(CC) -o $(BIN) $^ $(CFLAGS) $(LDLIBS)
 	@echo make target [$@] is complete
 
-%o: %c
+$(SRC)/%o: $(SRC)/%c
 	$(CC) -c $< -o $@ $(CFLAGS) 
 	@echo make target [$@] is complete
 
