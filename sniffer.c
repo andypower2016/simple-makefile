@@ -17,6 +17,19 @@
 #include<sys/time.h>
 #include<sys/types.h>
 #include<unistd.h>
+
+struct arphdr 
+{
+   unsigned short ar_hrd;
+   unsigned short ar_pro;
+   unsigned char ar_hln;
+   unsigned char ar_pln;
+   unsigned short ar_op;
+   unsigned char ar_sha[ETH_ALEN];
+   unsigned char ar_sip[4];
+   unsigned char ar_tha[ETH_ALEN];
+   unsigned char ar_tip[4];
+};
  
 void ProcessPacket(unsigned char* , int);
 void print_ip_header(unsigned char* , int);
