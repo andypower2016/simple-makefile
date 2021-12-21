@@ -34,7 +34,7 @@ int main()
     int saddr_size , data_size;
     struct sockaddr saddr;
          
-    unsigned char *buffer = (unsigned char *) malloc(65536); //Its Big!
+    unsigned char *buffer = (unsigned char *) malloc(65536); 
      
     logfile=fopen("log.txt","w");
     if(logfile==NULL) 
