@@ -30,6 +30,9 @@ struct arphdr
    unsigned char ar_tha[ETH_ALEN];
    unsigned char ar_tip[4];
 };
+// ntohs(eth_h.proto) == ETH_P_ARP ETH_P_RARP ETH_P_IP
+// ip->protocol IPPROTO_TCP,IPPROTO_UDP,IPPROTO_ICMP,
+
  
 void ProcessPacket(unsigned char* , int);
 void print_ip_header(unsigned char* , int);
