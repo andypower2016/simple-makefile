@@ -1,5 +1,8 @@
 SUBDIRS := $(wildcard */.)
 
+INC_PATHS := $(wildcard /yourpath/*/.)
+INC 	  := $(foreach d, $(INC_PATHS), -I$d)
+
 all: subdirs
 
 subdirs:
