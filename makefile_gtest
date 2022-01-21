@@ -1,0 +1,18 @@
+CC  := gcc
+CXX := g++
+CXXFLAGS := -O2 -Wall -std=c++11 -DVar
+CFLAGS := -O2 -Wall
+INC := -I"D:\Me\Source\google test\googletest\googletest\include"
+LIBPATH := -L"D:\Me\Source\google test\googletest\build\lib"
+LIBS := -lgtest -lstdc++
+
+.PHONY:main
+main:
+	$(CXX) $(CXXFLAGS) $(INC) main.c "C:\\Users\\User\\Desktop\\gtest\\test.o" $(LIBPATH) $(LIBS) -o main
+
+shared:
+	$(CXX) $(CXXFLAGS) $(INC) -c main.c -o main.o
+	$(CC) -fPIC -shared -o libmain.so main.o "C:\\Users\\User\\Desktop\\gtest\\test.o" $(LIBPATH) $(LIBS)
+
+clean:
+	rm *.exe *.so *.o
