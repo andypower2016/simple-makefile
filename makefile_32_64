@@ -13,3 +13,13 @@ all:
 
 clean:
 	rm *.exe *.o
+	
+# If linking a 32bit .o with a 64bit .o using a x86_64 compiler	
+# C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/11.2.0/../../.././x86_64-w64-mingw32/bin/ld.exe: i386 architecture of input file `..32/main_32.o' is incompatible with i386:x86-64 output
+collect2.exe: error: ld returned 1 exit status
+
+# If linking a 32bit .o with a 64bit .o using a x86_32 compiler	
+# ../64/main_64.o: file not recognized: File format not recognized
+collect2.exe: error: ld returned 1 exit status
+
+
