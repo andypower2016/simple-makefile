@@ -3,18 +3,26 @@ CXX := g++
 CXXFLAGS := -O2 -Wall -std=c++11 -DVar
 CFLAGS := -O2 -Wall
 INC := -I"D:\Me\Source\google test\googletest\googletest\include"
-LIBPATH := -L"D:\Me\Source\google test\googletest\build\lib" -L"."
+LIBPATH := -L"D:\Me\Source\google test\googletest\build\lib"
 LIBS := -lgtest -lstdc++ 
 
 .PHONY:main
-main:
-	#link the dynamic lib (libfunc) with main.o
-	$(CXX) $(CXXFLAGS) $(INC) main.c -o main $(LIBPATH) $(LIBS) -lfunc 
+main: shared
+	#link the static lib (libfunc) with main.o
+	$(CXX) $(CXXFLAGS) $(INC) main.c -L"." -lfunc -o main 
+	
 
-shared:
-	$(CXX) $(CXXFLAGS) -c tmp.c -o tmp.o 
-	# link gtest objects (test.o) with other objects (tmp.o) and create a dynamic lib (libfunc)
+.PHONY:manual
+manual:tmp.o
+	# link tmp.o test.o (gtest related) 
+	$(CXX) $(CXXFLAGS) $(INC) main.c tmp.o "C:\\Users\\User\\Desktop\\gtest\\test.o" $(LIBPATH) $(LIBS) -o main
+
+shared:tmp.o
+	# link gtest objects (test.o) with other objects (tmp.o) and create a static lib (libfunc)
 	$(CC) -fPIC -shared -o libfunc.a tmp.o "C:\\Users\\User\\Desktop\\gtest\\test.o" $(LIBPATH) $(LIBS)
+
+%.o:%.c
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
 	rm *.exe *.so *.o *.a
