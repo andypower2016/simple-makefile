@@ -1,0 +1,17 @@
+CC  := gcc
+CXX := g++
+CXXFLAGS := -O2 -Wall -std=c++11 -DVar
+CFLAGS := -O2 -Wall 
+INC := -I"D:\Me\Source\google test\googletest\googletest\include"
+LIBPATH := -L"D:\Me\Source\google test\googletest\build\lib"
+LIBS := -lgtest
+
+.PHONY:main
+main:
+	$(CXX) $(CXXFLAGS) $(INC) main.cc $(LIBPATH) $(LIBS) -o main 
+
+compile:
+	$(CXX) $(CXXFLAGS) $(INC) -c main.cc -o test.o 
+	
+clean:
+	rm main.exe *.o
