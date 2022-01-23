@@ -3,16 +3,18 @@ CXX := g++
 CXXFLAGS := -O2 -Wall -std=c++11 -DVar
 CFLAGS := -O2 -Wall
 INC := -I"D:\Me\Source\google test\googletest\googletest\include"
-LIBPATH := -L"D:\Me\Source\google test\googletest\build\lib"
-LIBS := -lgtest -lstdc++
+LIBPATH := -L"D:\Me\Source\google test\googletest\build\lib" -L"."
+LIBS := -lgtest -lstdc++ 
 
 .PHONY:main
 main:
-	$(CXX) $(CXXFLAGS) $(INC) main.c "C:\\Users\\User\\Desktop\\gtest\\test.o" $(LIBPATH) $(LIBS) -o main
+	#link the dynamic lib (libfunc) with main.o
+	$(CXX) $(CXXFLAGS) $(INC) main.c -o main $(LIBPATH) $(LIBS) -lfunc 
 
 shared:
-	$(CXX) $(CXXFLAGS) $(INC) -c main.c -o main.o
-	$(CC) -fPIC -shared -o libmain.so main.o "C:\\Users\\User\\Desktop\\gtest\\test.o" $(LIBPATH) $(LIBS)
+	$(CXX) $(CXXFLAGS) -c tmp.c -o tmp.o 
+	# link gtest objects (test.o) with other objects (tmp.o) and create a dynamic lib (libfunc)
+	$(CC) -fPIC -shared -o libfunc.a tmp.o "C:\\Users\\User\\Desktop\\gtest\\test.o" $(LIBPATH) $(LIBS)
 
 clean:
-	rm *.exe *.so *.o
+	rm *.exe *.so *.o *.a
