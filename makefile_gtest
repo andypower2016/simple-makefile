@@ -11,7 +11,7 @@ main:
 	$(CXX) $(CXXFLAGS) $(INC) main.cc $(LIBPATH) $(LIBS) -o main 
 
 compile:
-	$(CXX) $(CXXFLAGS) $(INC) -c main.cc -o test.o 
+	$(CXX) $(CXXFLAGS) $(INC) -c main.cc -o main.o 
 	
 clean:
 	rm main.exe *.o
