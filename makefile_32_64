@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS := -m64 
-x86_32 = no
+x86_64 = no
 
-ifeq ($(x86_32),yes)
+ifeq ($(x86_64),no)
 	CFLAGS := -m32
 endif
 
