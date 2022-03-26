@@ -1,2 +1,4 @@
 remote info
 remote add 1
+local add 1
+
