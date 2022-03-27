@@ -18,3 +18,4 @@ local add 4
 remote add 5
 local add 5
 
+remote add 6
