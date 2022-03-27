@@ -16,3 +16,5 @@ local add 4
 
 
 remote add 5
+local add 5
+
