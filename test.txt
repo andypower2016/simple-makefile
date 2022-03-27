@@ -2,38 +2,3 @@ remote info
 remote add 1
 local add 1
 
-
-remote add 2
-local add 2
-
-
-remote add 3
-local add 3
-
-
-remote add 4
-local add 4
-
-
-remote add 5
-local add 5
-
-
-remote add 6
-local add 6
-
-
-remote add 7
-local add 7
-
-
-remote add 8
-local add 8
-
-
-remote add 9
-local add 9
-
-
-remote add 10
-local add 10
