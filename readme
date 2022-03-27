@@ -5,3 +5,4 @@ gcc create sharedlib
 
 
 local add 1
+local add 7
