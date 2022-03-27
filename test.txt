@@ -3,3 +3,4 @@ remote add 1
 local add 1
 
 remote add 2
+local add 2
