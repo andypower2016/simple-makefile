@@ -9,3 +9,5 @@ local add 7
 local add 8
 
 remote add 9
+
+remote only
