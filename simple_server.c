@@ -33,14 +33,12 @@ void signal_handler(int signum) {
 
 int main(int argc, char *argv[])
 {
-    signal(SIGINT, signal_handler);
-    
-    
-    struct sockaddr_in serv_addr; 
     int ret;
-
+    struct sockaddr_in serv_addr; 
     char buffer[PACKET_SIZE];
     //time_t ticks; 
+    
+    signal(SIGINT, signal_handler);
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     memset(&serv_addr, '0', sizeof(serv_addr));
