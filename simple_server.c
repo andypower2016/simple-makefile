@@ -47,12 +47,12 @@ int main(int argc, char *argv[])
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     serv_addr.sin_port = htons(PORT); 
-
+    
     ret = bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)); 
     if(ret < 0) {
         printf("bind error\n");
     }
-
+   
     ret = listen(listenfd, 10); 
     if(ret < 0) {
         printf("listen error\n");
@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
 
     while(1)
     {
+        printf("server listening ...\n");
         acceptfd = accept(listenfd, (struct sockaddr*)NULL, NULL); 
         if(acceptfd != -1) {
             printf("client connected\n");
