@@ -13,7 +13,7 @@
 #define PACKET_SIZE 1024
 #define PORT 8080
 
-int sock = -1;
+int fd = -1;
 
 void signal_handler(int signum) 
 {
@@ -85,15 +85,17 @@ char* getlocalhostip()
  
 int main(int argc, char const* argv[])
 {
-    signal(SIGINT, signal_handler);
-    
     int bytes = 0;
     struct sockaddr_in serv_addr;
     char* hello = "Hello from client";
     char* localip = NULL;
     char buffer[PACKET_SIZE] = {0};
-
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    int ret ;
+    
+    signal(SIGINT, signal_handler);
+    
+    fd = socket(AF_INET, SOCK_STREAM, 0)
+    if (fd < 0) {
         printf("\n Socket creation error \n");
         return -1;
     }
@@ -106,23 +108,25 @@ int main(int argc, char const* argv[])
  
     // Convert IPv4 and IPv6 addresses from text to binary
     // form
-    if (inet_pton(AF_INET, /*"127.0.0.1"*/ localip , &serv_addr.sin_addr) <= 0) 
+    ret = inet_pton(AF_INET, /*"127.0.0.1"*/ localip , &serv_addr.sin_addr);
+    if (ret <= 0) 
     {
         printf("\nInvalid address/ Address not supported \n");
         return -1;
     }
- 
-    if (connect(sock, (struct sockaddr*)&serv_addr,sizeof(serv_addr)) < 0) 
+    
+    ret = connect(fd, (struct sockaddr*)&serv_addr,sizeof(serv_addr));
+    if (ret < 0) 
     {
         printf("\nConnection Failed \n");
         return -1;
     }
 
-    bytes = send(sock, hello, strlen(hello), 0);
+    bytes = send(fd, hello, strlen(hello), 0);
     printf("Hello message sent %s \n", bytes);
     //valread = read(sock, buffer, 1024);
     //printf("%s\n", buffer);
 
-    close(sock);
+    close(fd);
     return 0;
 }
