@@ -15,7 +15,8 @@
 
 int sock = -1;
 
-void signal_handler(int signum) {
+void signal_handler(int signum) 
+{
     printf("signal_handler: caught signal %d\n", signum);
     if (signum == SIGINT) {
         printf("SIGINT\n");
