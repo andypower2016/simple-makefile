@@ -7,10 +7,25 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <signal.h>
 
 
 #define PACKET_SIZE 1024
 #define PORT 8080
+
+int sock = -1;
+
+void signal_handler(int signum) {
+    printf("signal_handler: caught signal %d\n", signum);
+    if (signum == SIGINT) {
+        printf("SIGINT\n");
+        
+        if(sock != -1)
+            close(sock);
+        
+        exit(1);
+    }
+}
 
 
 // Returns hostname for the local computer
@@ -69,7 +84,8 @@ char* getlocalhostip()
  
 int main(int argc, char const* argv[])
 {
-    int sock = 0;
+    signal(SIGINT, signal_handler);
+    
     int bytes = 0;
     struct sockaddr_in serv_addr;
     char* hello = "Hello from client";
