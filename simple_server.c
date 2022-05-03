@@ -8,14 +8,34 @@
 #include <string.h>
 #include <sys/types.h>
 #include <time.h> 
+#include <signal.h>
 
 #define PACKET_SIZE 1024
 #define PORT 8080
 
+int listenfd = -1;
+int acceptfd = -1;
+
+void signal_handler(int signum) {
+    printf("signal_handler: caught signal %d\n", signum);
+    if (signum == SIGINT) {
+        printf("SIGINT\n");
+        
+        if(listenfd != -1)
+            close(listenfd);
+        
+        if(acceptfd != -1)
+            close(acceptfd);
+
+        exit(1);
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    int listenfd = 0;
-    int acceptfd = 0;
+    signal(SIGINT, signal_handler);
+    
+    
     struct sockaddr_in serv_addr; 
     int ret;
 
@@ -36,14 +56,17 @@ int main(int argc, char *argv[])
     }
 
     ret = listen(listenfd, 10); 
+    if(ret < 0) {
+        printf("listen error\n");
+    }
 
     while(1)
     {
         acceptfd = accept(listenfd, (struct sockaddr*)NULL, NULL); 
         if(acceptfd != -1) {
             printf("client connected\n");
-            read(acceptfd, buffer, PACKET_SIZE);
-            printf("recieved %s from client\n", buffer);
+            ret = read(acceptfd, buffer, PACKET_SIZE);
+            printf("recieved %s from client %s bytes\n", buffer, ret);
             close(acceptfd);
             break;    
         }
