@@ -73,7 +73,6 @@ int main(int argc, char *argv[])
       rc = send(fd, buffer, BUFFER_LENGTH, 0);
       if(rc > 0) {
          printf("send to server success\n");
-         break;
       }
 
       printf("Wait for ack from server ...\n");
