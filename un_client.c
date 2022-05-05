@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
    if (fd < 0)
    {
       perror("socket() failed");
-      break;
+      return 0;
    }
 
    memset(&serveraddr, 0, sizeof(serveraddr));
@@ -60,7 +60,8 @@ int main(int argc, char *argv[])
    if (rc < 0)
    {
       perror("connect() failed");
-      break;
+      close(fd);
+      return 0;
    }
 
 
