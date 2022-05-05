@@ -84,12 +84,13 @@ int main()
 
       read_fds = master;
 
+      printf("server select ...\n");
       rc = select(fdmax+1, &read_fds, NULL, NULL, NULL);
 
       if(rc == -1) {
-         /*printf("server select error ...\n");
+         printf("server select error ...\n");
          CloseServer();
-         return 0;*/
+         return 0;
       }
       
       for(i = 0 ; i < fdmax ; ++i) {
