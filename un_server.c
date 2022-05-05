@@ -18,7 +18,11 @@ int i;
 void CloseServer()
 {
    for(i = 0 ; i < fdmax ; ++i) {
+<<<<<<< HEAD
       if(FD_ISSET(i, &master)) {
+=======
+      if(FD_ISSET(i, master)) {
+>>>>>>> 5c0dccc9936cb30a9cdba4d8f024075662eac994
          close(i);
       }
    }
@@ -84,7 +88,9 @@ int main()
       read_fds = master;
 
       rc = select(fdmax+1, &read_fds, NULL, NULL, NULL);
+
       if(rc < 0) {
+
          printf("server select error ...\n");
          break;
       }
