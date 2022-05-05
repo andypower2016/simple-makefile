@@ -71,11 +71,12 @@ int main(int argc, char *argv[])
       memset(buffer,0,BUFFER_LENGTH);
       strcpy(buffer,"Hello Server");
       rc = send(fd, buffer, BUFFER_LENGTH, 0);
-      if(rc < 0) {
-         printf("send to server fail\n");
+      if(rc > 0) {
+         printf("send to server success\n");
          break;
       }
 
+      printf("Wait for ack from server ...\n");
       memset(buffer,0,BUFFER_LENGTH);
       rc = recv(fd, buffer, BUFFER_LENGTH, 0);
       if(rc > 0) {
