@@ -93,7 +93,7 @@ int main()
          return 0;
       }
       
-      for(i = 0 ; i < fdmax ; ++i) {
+      for(i = 0 ; i <= fdmax ; ++i) {
 
          if(FD_ISSET(i, &read_fds)) {
             if(i == listenfd) {
