@@ -87,11 +87,11 @@ int main()
       printf("server select ...\n");
       rc = select(fdmax+1, &read_fds, NULL, NULL, NULL);
 
-      if(rc == -1) {
+      /*if(rc == -1) {
          printf("server select error ...\n");
          CloseServer();
          return 0;
-      }
+      }*/
       
       for(i = 0 ; i <= fdmax ; ++i) {
 
@@ -122,7 +122,7 @@ int main()
                   send(i, buffer, BUFFER_LENGTH, 0);
 
                   while(1) {
-                     
+
                   }
                }
             }          
