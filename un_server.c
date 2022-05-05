@@ -18,11 +18,7 @@ int i;
 void CloseServer()
 {
    for(i = 0 ; i < fdmax ; ++i) {
-<<<<<<< HEAD
       if(FD_ISSET(i, &master)) {
-=======
-      if(FD_ISSET(i, master)) {
->>>>>>> 5c0dccc9936cb30a9cdba4d8f024075662eac994
          close(i);
       }
    }
