@@ -113,6 +113,7 @@ int main()
                rc = recv(i, buffer, BUFFER_LENGTH, 0);
                if(rc == 0) {
                   /* client close connection */
+                  printf("Client[%d] closed connection\n", i);
                   close(i);
                   FD_CLR(i, &master); 
                } else if (rc > 0) {
