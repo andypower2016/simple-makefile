@@ -86,10 +86,10 @@ int main()
 
       rc = select(fdmax+1, &read_fds, NULL, NULL, NULL);
 
-      if(rc < 0) {
-
-         printf("server select error ...\n");
-         break;
+      if(rc == -1) {
+         /*printf("server select error ...\n");
+         CloseServer();
+         return 0;*/
       }
       
       for(i = 0 ; i < fdmax ; ++i) {
