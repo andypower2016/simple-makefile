@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
       rc = send(fd, buffer, BUFFER_LENGTH, 0);
       if(rc < 0) {
          printf("send to server fail\n");
+         break;
       }
 
       memset(buffer,0,BUFFER_LENGTH);

@@ -97,6 +97,7 @@ int main()
 
          if(FD_ISSET(i, &read_fds)) {
             if(i == listenfd) {
+               printf("i=%d , listenfd=%d\n", i, listenfd);
                acceptfd = accept(listenfd, NULL, NULL);
                if(acceptfd == -1) {
                   printf("accept error\n");
