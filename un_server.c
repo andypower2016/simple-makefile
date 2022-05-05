@@ -98,7 +98,7 @@ int main()
          if(FD_ISSET(i, &read_fds)) {
             if(i == listenfd) {
                acceptfd = accept(i, NULL, NULL);
-               if(acceptfd < 0) {
+               if(acceptfd == -1) {
                   printf("accept error\n");
                }
                else {
@@ -111,11 +111,11 @@ int main()
             {
                memset(buffer, 0, BUFFER_LENGTH);
                rc = recv(i, buffer, BUFFER_LENGTH, 0);
-               if(rc <= 0) {
+               if(rc == 0) {
                   /* client close connection */
                   close(i);
                   FD_CLR(i, &master); 
-               } else {
+               } else if (rc > 0) {
                   printf("Server recv %s from client[%d]\n", buffer, i);   
                   memset(buffer,0,BUFFER_LENGTH);
                   strcpy(buffer,"server ack");
