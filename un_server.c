@@ -120,10 +120,6 @@ int main()
                   memset(buffer,0,BUFFER_LENGTH);
                   strcpy(buffer,"server ack");
                   send(i, buffer, BUFFER_LENGTH, 0);
-
-                  while(1) {
-
-                  }
                }
             }          
          }
