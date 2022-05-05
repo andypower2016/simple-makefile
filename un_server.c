@@ -1,158 +1,128 @@
-/**************************************************************************/
-/* This example program provides code for a server application that uses     */
-/* AF_UNIX address family                                                 */
-/**************************************************************************/
-
-/**************************************************************************/
-/* Header files needed for this sample program                            */
-/**************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <signal.h>
+#include <time.h>
 
-/**************************************************************************/
-/* Constants used by this program                                         */
-/**************************************************************************/
 #define SERVER_PATH     "/tmp/server"
-#define BUFFER_LENGTH    250
+#define BUFFER_LENGTH    1024
 #define FALSE              0
+
+fd_set master; 
+fd_set read_fds; 
+int fdmax; 
+int i;
+
+void CloseServer()
+{
+   for(i = 0 ; i < fdmax ; ++i) {
+      if(FD_ISSET(i, &master)) {
+         close(i);
+      }
+   }
+   unlink(SERVER_PATH);
+}
+
+void sighandler(int sig)
+{
+   CloseServer();
+}
 
 int main()
 {
-   /***********************************************************************/
-   /* Variable and structure definitions.                                 */
-   /***********************************************************************/
-   int    sd=-1, sd2=-1;
-   int    rc, length;
+
+   int    listenfd=-1, acceptfd=-1;
+   int    rc;
    char   buffer[BUFFER_LENGTH];
    struct sockaddr_un serveraddr;
 
-   /***********************************************************************/
-   /* A do/while(FALSE) loop is used to make error cleanup easier.  The   */
-   /* close() of each of the socket descriptors is only done once at the  */
-   /* very end of the program.                                            */
-   /***********************************************************************/
+   signal(SIGINT, sighandler);
+
    do
    {
-      /********************************************************************/
-      /* The socket() function returns a socket descriptor, which represents   */
-      /* an endpoint.  The statement also identifies that the UNIX        */
-      /* address family with the stream transport (SOCK_STREAM) will be   */
-      /* used for this socket.                                            */
-      /********************************************************************/
-      sd = socket(AF_UNIX, SOCK_STREAM, 0);
-      if (sd < 0)
+      listenfd = socket(AF_UNIX, SOCK_STREAM, 0);
+      if (listenfd < 0)
       {
          perror("socket() failed");
          break;
       }
 
-      /********************************************************************/
-      /* After the socket descriptor is created, a bind() function gets a */
-      /* unique name for the socket.                                      */
-      /********************************************************************/
       memset(&serveraddr, 0, sizeof(serveraddr));
       serveraddr.sun_family = AF_UNIX;
       strcpy(serveraddr.sun_path, SERVER_PATH);
 
-      rc = bind(sd, (struct sockaddr *)&serveraddr, SUN_LEN(&serveraddr));
+      unlink(SERVER_PATH);
+      rc = bind(listenfd, (struct sockaddr *)&serveraddr, SUN_LEN(&serveraddr));
       if (rc < 0)
       {
          perror("bind() failed");
          break;
       }
 
-      /********************************************************************/
-      /* The listen() function allows the server to accept incoming       */
-      /* client connections.  In this example, the backlog is set to 10.  */
-      /* This means that the system will queue 10 incoming connection     */
-      /* requests before the system starts rejecting the incoming         */
-      /* requests.                                                        */
-      /********************************************************************/
-      rc = listen(sd, 10);
+      rc = listen(listenfd, 10);
       if (rc< 0)
       {
          perror("listen() failed");
          break;
       }
 
-      printf("Ready for client connect().\n");
-
-      /********************************************************************/
-      /* The server uses the accept() function to accept an incoming      */
-      /* connection request.  The accept() call will block indefinitely   */
-      /* waiting for the incoming connection to arrive.                   */
-      /********************************************************************/
-      sd2 = accept(sd, NULL, NULL);
-      if (sd2 < 0)
-      {
-         perror("accept() failed");
-         break;
-      }
-
-      /********************************************************************/
-      /* In this example we know that the client will send 250 bytes of   */
-      /* data over.  Knowing this, we can use the SO_RCVLOWAT socket      */
-      /* option and specify that we don't want our recv() to wake up      */
-      /* until all 250 bytes of data have arrived.                        */
-      /********************************************************************/
-      length = BUFFER_LENGTH;
-      rc = setsockopt(sd2, SOL_SOCKET, SO_RCVLOWAT,
-                                          (char *)&length, sizeof(length));
-      if (rc < 0)
-      {
-         perror("setsockopt(SO_RCVLOWAT) failed");
-         break;
-      }
-      /****************************************************/
-      /* Receive that 250 bytes data from the client */
-      /****************************************************/
-      rc = recv(sd2, buffer, sizeof(buffer), 0);
-      if (rc < 0)
-      {
-         perror("recv() failed");
-         break;
-      } 
-      printf("%d bytes of data were received\n", rc);
-      if (rc == 0 ||
-          rc < sizeof(buffer))
-      {
-         printf("The client closed the connection before all of the\n");
-         printf("data was sent\n");
-         break;
-      }
-
-      /********************************************************************/
-      /* Echo the data back to the client                                 */
-      /********************************************************************/
-      rc = send(sd2, buffer, sizeof(buffer), 0);
-      if (rc < 0)
-      {
-         perror("send() failed");
-         break;
-      }
-
-      /********************************************************************/
-      /* Program complete                                                 */
-      /********************************************************************/
-
    } while (FALSE);
 
-   /***********************************************************************/
-   /* Close down any open socket descriptors                              */
-   /***********************************************************************/
-   if (sd != -1)
-      close(sd);
+   printf("Server ready for client to connect()...\n");
 
-   if (sd2 != -1)
-      close(sd2);
+   FD_ZERO(&master); 
+   FD_ZERO(&read_fds);
 
-    /***********************************************************************/
-   /* Remove the UNIX path name from the file system                      */
-   /***********************************************************************/
-   unlink(SERVER_PATH);
+   FD_SET(listenfd, &master);
+   fdmax = listenfd; 
+   
+   /* main loop */
+   while(1) {
+
+      read_fds = master;
+
+      rc = select(fdmax+1, &read_fds, NULL, NULL, NULL);
+      if(rc < 0) {
+         printf("server select error ...\n");
+         break;
+      }
+      
+      for(i = 0 ; i < fdmax ; ++i) {
+
+         if(FD_ISSET(i, &read_fds)) {
+            if(i == listenfd) {
+               acceptfd = accept(i, NULL, NULL);
+               if(acceptfd < 0) {
+                  printf("accept error\n");
+               }
+               else {
+                  FD_SET(acceptfd, &master);
+                  fdmax = acceptfd > fdmax ? acceptfd : fdmax;
+                  printf("New connection from client[%d]\n", acceptfd);
+               }
+            }  
+            else /* handle connected client */
+            {
+               memset(buffer, 0, BUFFER_LENGTH);
+               rc = recv(i, buffer, BUFFER_LENGTH, 0);
+               if(rc <= 0) {
+                  /* client close connection */
+                  close(i);
+                  FD_CLR(i, &master); 
+               } else {
+                  printf("Server recv %s from client[%d]\n", buffer, i);   
+                  memset(buffer,0,BUFFER_LENGTH);
+                  strcpy(buffer,"server ack");
+                  send(i, buffer, BUFFER_LENGTH, 0);
+               }
+            }          
+         }
+      }
+   }
+   
+   CloseServer();
 
    return 0;
 }
