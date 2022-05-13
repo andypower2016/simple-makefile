@@ -31,6 +31,75 @@ void sighandler(int sig)
    CloseServer();
 }
 
+void func1(int fd)
+{
+   char buffer[BUFFER_LENGTH];
+   int rc;
+   /* send get sys time */
+   memset(buffer, 0, BUFFER_LENGTH);
+   strcpy(buffer, "getsystemtime");
+   send(fd, buffer, strlen(buffer), 0);
+   
+   /* recv */
+   struct timeval tv;
+   tv.tv_sec = 3;
+   tv.tv_usec = 0;
+   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
+
+   memset(buffer, 0, BUFFER_LENGTH);
+   rc = recv(fd, buffer, BUFFER_LENGTH, 0);
+
+   if(rc <= 0) {
+      printf("[%s] timeout\n", __FUNCTION__);
+   }
+   else {
+      buffer[rc+1] = '\0';
+      printf("[%s] system time = %s\n", __FUNCTION__,buffer);
+      
+      memset(buffer, 0, BUFFER_LENGTH);
+      strcpy(buffer, "ack");
+      send(fd, buffer, strlen(buffer), 0);
+   }
+}
+
+
+void HandleMessage(int fd, char message[], int len)
+{
+   char buffer[BUFFER_LENGTH];
+   int rc;
+   if(strcmp("func1", message) == 0)
+   {
+      printf("[%s] get message %s\n", __FUNCTION__, message);
+      func1(fd);
+   }
+   else
+   {
+      printf("[%s] not recognized message\n",__FUNCTION__);
+   }
+}
+
+void Recieve(int fd, char buffer[]) {
+
+   memset(buffer, 0, BUFFER_LENGTH);
+   int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
+   if(rc == 0) {
+      /* client close connection */
+      printf("Client[%d] closed connection\n", fd);
+      close(fd);
+      FD_CLR(fd, &master); 
+
+   } else if (rc > 0) {
+
+      buffer[rc+1] = '\0';
+      printf("Server recv %s from client[%d]\n", buffer, fd);   
+      
+      HandleMessage(fd, buffer, rc);
+      /*memset(buffer,0,BUFFER_LENGTH);
+      strcpy(buffer,"server ack");
+      send(i, buffer, BUFFER_LENGTH, 0);*/
+   }
+}
+
 int main()
 {
 
@@ -93,15 +162,19 @@ int main()
          return 0;
       }
       
-      for(i = 0 ; i <= fdmax ; ++i) {
-
-         if(FD_ISSET(i, &read_fds)) {
-            if(i == listenfd) {
+      for(i = 0 ; i <= fdmax ; ++i) 
+      {
+         if(FD_ISSET(i, &read_fds)) 
+         {
+            if(i == listenfd) 
+            {
                acceptfd = accept(i, NULL, NULL);
-               if(acceptfd == -1) {
+               if(acceptfd == -1) 
+               {
                   printf("accept error\n");
                }
-               else {
+               else 
+               {
                   FD_SET(acceptfd, &master);
                   fdmax = acceptfd > fdmax ? acceptfd : fdmax;
                   printf("New connection from client[%d]\n", acceptfd);
@@ -109,19 +182,7 @@ int main()
             }  
             else /* handle connected client */
             {
-               memset(buffer, 0, BUFFER_LENGTH);
-               rc = recv(i, buffer, BUFFER_LENGTH, 0);
-               if(rc == 0) {
-                  /* client close connection */
-                  printf("Client[%d] closed connection\n", i);
-                  close(i);
-                  FD_CLR(i, &master); 
-               } else if (rc > 0) {
-                  printf("Server recv %s from client[%d]\n", buffer, i);   
-                  memset(buffer,0,BUFFER_LENGTH);
-                  strcpy(buffer,"server ack");
-                  send(i, buffer, BUFFER_LENGTH, 0);
-               }
+               Recieve(i, buffer);
             }          
          }
       }

@@ -6,6 +6,7 @@
 /* Header files needed for this sample program                            */
 /**************************************************************************/
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -68,20 +69,25 @@ int main(int argc, char *argv[])
 
    while(1) {
       
+
       /* send data to server */
-      memset(buffer,0,BUFFER_LENGTH);
-      strcpy(buffer,"Hello Server");
-      rc = send(fd, buffer, BUFFER_LENGTH, 0);
+      /*memset(buffer,0,BUFFER_LENGTH);
+      strcpy(buffer,"Hello Server");*/
+      printf("Input message ...\n");
+      fgets(buffer, sizeof(buffer), stdin);
+      int sendlen = strlen(buffer);
+      rc = send(fd, buffer, sendlen, 0);
       if(rc > 0) {
-         printf("send to server success\n");
+         printf("send [%s] to server success\n", buffer);
       }
 
+      /*
       printf("Wait for ack from server ...\n");
       memset(buffer,0,BUFFER_LENGTH);
       rc = recv(fd, buffer, BUFFER_LENGTH, 0);
       if(rc > 0) {
          printf("Data from server : %s\n", buffer);
-      }
+      }*/
 
       sleep(3);
    }
