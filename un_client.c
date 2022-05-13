@@ -48,8 +48,8 @@ void HandleMessage(int fd, char message[], int len)
       }
 
       memset(buffer,0,sizeof(buffer));
-      rc = recv(fd, buffer, 0);
-      buffer[rc+1] = '\0';
+      rc = recv(fd, buffer,sizeof(buffer), 0);
+      buffer[rc] = '\0';
       if(rc > 0 && (strcmp(buffer, "ack") == 0 ))
       {
          printf("[%s] recv ack from server\n",__FUNCTION__);
@@ -63,15 +63,20 @@ void HandleMessage(int fd, char message[], int len)
 
 void Recieve(int fd, char buffer[]) {
 
+   struct timeval tv;
+   tv.tv_sec = 2;
+   tv.tv_usec = 0;
+   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
+
    memset(buffer, 0, BUFFER_LENGTH);
    int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
-   if(rc == 0) {
+   if(rc <= 0) {
       
       printf("[%s] recv nothing\n", __FUNCTION__);
      
    } else if (rc > 0) {
 
-      buffer[rc+1] = '\0';
+      buffer[rc] = '\0';
       printf("recv %s from server[%d]\n", buffer, fd);        
       HandleMessage(fd, buffer, rc);
 
@@ -118,15 +123,18 @@ int main(int argc, char *argv[])
       /*memset(buffer,0,BUFFER_LENGTH);
       strcpy(buffer,"Hello Server");*/
       printf("Input message ...\n");
+      memset(buffer,0,BUFFER_LENGTH);
       fgets(buffer, sizeof(buffer), stdin);
       int sendlen = strlen(buffer);
-      fflush(fd);
+      //fflush(fd);
       rc = send(fd, buffer, sendlen, 0);
       if(rc > 0) {
-         printf("send [%s] to server success\n", buffer);
+         buffer[rc-1] = '\0';
+         printf("send %s to server success\n", buffer);
+         Recieve(fd, buffer);
       }
 
-      Recieve(fd, buffer);
+      
       /*
       printf("Wait for ack from server ...\n");
       memset(buffer,0,BUFFER_LENGTH);
