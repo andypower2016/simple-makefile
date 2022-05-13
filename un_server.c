@@ -35,35 +35,41 @@ void func1(int fd)
 {
    char buffer[BUFFER_LENGTH];
    int rc;
-   /* send get sys time */
-   memset(buffer, 0, BUFFER_LENGTH);
-   strcpy(buffer, "getsystemtime");
-   send(fd, buffer, strlen(buffer), 0);
-   
-   /* recv */
-   struct timeval tv;
-   tv.tv_sec = 3;
-   tv.tv_usec = 0;
-   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
 
-   memset(buffer, 0, BUFFER_LENGTH);
-   rc = recv(fd, buffer, BUFFER_LENGTH, 0);
+   int count = 3;
 
-   if(rc <= 0) {
-      printf("[%s] timeout\n", __FUNCTION__);
-   }
-   else {
-      buffer[rc+1] = '\0';
-      printf("[%s] system time = %s\n", __FUNCTION__,buffer);
-      
+   while(count--)
+   {
+      /* send get sys time */
       memset(buffer, 0, BUFFER_LENGTH);
-      strcpy(buffer, "ack");
+      strcpy(buffer, "getsystemtime");
       send(fd, buffer, strlen(buffer), 0);
+      
+      /* recv */
+      struct timeval tv;
+      tv.tv_sec = 3;
+      tv.tv_usec = 0;
+      setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
+
+      memset(buffer, 0, BUFFER_LENGTH);
+      rc = recv(fd, buffer, BUFFER_LENGTH, 0);
+
+      if(rc <= 0) {
+         printf("[%s] timeout\n", __FUNCTION__);
+      }
+      else {
+         buffer[rc+1] = '\0';
+         printf("[%s] system time = %s\n", __FUNCTION__,buffer);
+         
+         /*memset(buffer, 0, BUFFER_LENGTH);
+         strcpy(buffer, "ack");
+         send(fd, buffer, strlen(buffer), 0);*/
+      }
    }
 }
 
 
-void HandleMessage(int fd, char message[], int len)
+void HandleMessage(int fd, char message[])
 {
    char buffer[BUFFER_LENGTH];
    int rc;
@@ -75,6 +81,15 @@ void HandleMessage(int fd, char message[], int len)
    else
    {
       printf("[%s] not recognized message\n",__FUNCTION__);
+   }
+
+   /* Handle message end , send "end" to client */
+   memset(buffer,0,BUFFER_LENGTH);
+   strcpy(buffer,"end");
+   rc = send(fd, buffer, strlen(buffer), 0);
+   if(rc > 0) {
+
+      printf("[%s] send %s to client[%d]\n", __FUNCTION__, buffer, fd);
    }
 }
 
@@ -93,7 +108,7 @@ void Recieve(int fd, char buffer[]) {
       buffer[rc-1] = '\0';
       printf("Server recv %s from client[%d]\n", buffer, fd);   
       
-      HandleMessage(fd, buffer, rc);
+      HandleMessage(fd, buffer);
       /*memset(buffer,0,BUFFER_LENGTH);
       strcpy(buffer,"server ack");
       send(i, buffer, BUFFER_LENGTH, 0);*/

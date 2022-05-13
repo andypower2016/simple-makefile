@@ -35,7 +35,7 @@ void sighandler(int sig)
 }
 
 
-void HandleMessage(int fd, char message[], int len)
+int HandleMessage(int fd, char message[], int len)
 {
    char buffer[BUFFER_LENGTH];
    int rc;
@@ -47,17 +47,24 @@ void HandleMessage(int fd, char message[], int len)
          printf("[%s] send message %s to server\n", __FUNCTION__, buffer);
       }
 
-      memset(buffer,0,sizeof(buffer));
+      /*memset(buffer,0,sizeof(buffer));
       rc = recv(fd, buffer,sizeof(buffer), 0);
       buffer[rc] = '\0';
       if(rc > 0 && (strcmp(buffer, "ack") == 0 ))
       {
          printf("[%s] recv ack from server\n",__FUNCTION__);
-      }
+      }*/
+      return 0;
+   }
+   else if(strcmp("end", message) == 0)
+   {
+      
+      return 1; /* end */
    }
    else
    {
       printf("[%s] not recognized message\n",__FUNCTION__);
+      return 1; /* end */
    }
 }
 
@@ -68,19 +75,23 @@ void Recieve(int fd, char buffer[]) {
    tv.tv_usec = 0;
    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
 
-   memset(buffer, 0, BUFFER_LENGTH);
-   int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
-   if(rc <= 0) {
-      
-      printf("[%s] recv nothing\n", __FUNCTION__);
-     
-   } else if (rc > 0) {
+   int bEnd = 0;
 
-      buffer[rc] = '\0';
-      printf("recv %s from server[%d]\n", buffer, fd);        
-      HandleMessage(fd, buffer, rc);
+   while(!bEnd) {
+      memset(buffer, 0, BUFFER_LENGTH);
+      int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
+      if(rc <= 0) {
+         
+         printf("[%s] recv nothing\n", __FUNCTION__);
+        
+      } else if (rc > 0) {
 
+         buffer[rc] = '\0';
+         printf("recv %s from server[%d]\n", buffer, fd);        
+         bEnd = HandleMessage(fd, buffer, rc);
+      }
    }
+   
 }
 
 int main(int argc, char *argv[])
