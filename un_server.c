@@ -35,7 +35,6 @@ void func1(int fd)
 {
    char buffer[BUFFER_LENGTH];
    int rc;
-
    int count = 3;
 
    while(count--)
@@ -46,11 +45,6 @@ void func1(int fd)
       send(fd, buffer, strlen(buffer), 0);
       
       /* recv */
-      struct timeval tv;
-      tv.tv_sec = 3;
-      tv.tv_usec = 0;
-      setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
-
       memset(buffer, 0, BUFFER_LENGTH);
       rc = recv(fd, buffer, BUFFER_LENGTH, 0);
 
@@ -73,6 +67,7 @@ void HandleMessage(int fd, char message[])
 {
    char buffer[BUFFER_LENGTH];
    int rc;
+
    if(strcmp("func1", message) == 0)
    {
       printf("[%s] get message %s\n", __FUNCTION__, message);
@@ -81,6 +76,7 @@ void HandleMessage(int fd, char message[])
    else
    {
       printf("[%s] not recognized message\n",__FUNCTION__);
+      return;
    }
 
    /* Handle message end , send "end" to client */
@@ -93,7 +89,8 @@ void HandleMessage(int fd, char message[])
    }
 }
 
-void Recieve(int fd, char buffer[]) {
+void Recieve(int fd, char buffer[]) 
+{
 
    memset(buffer, 0, BUFFER_LENGTH);
    int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
@@ -112,6 +109,9 @@ void Recieve(int fd, char buffer[]) {
       /*memset(buffer,0,BUFFER_LENGTH);
       strcpy(buffer,"server ack");
       send(i, buffer, BUFFER_LENGTH, 0);*/
+   }
+   else {
+      printf("[%s] recv timeout\n", __FUNCTION__);
    }
 }
 
@@ -193,6 +193,12 @@ int main()
                   FD_SET(acceptfd, &master);
                   fdmax = acceptfd > fdmax ? acceptfd : fdmax;
                   printf("New connection from client[%d]\n", acceptfd);
+
+                  struct timeval tv;
+                  tv.tv_sec = 3;
+                  tv.tv_usec = 0;
+                  setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (const char*) &tv, sizeof(tv));   
+                  setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));   
                }
             }  
             else /* handle connected client */

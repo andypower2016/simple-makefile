@@ -70,14 +70,10 @@ int HandleMessage(int fd, char message[], int len)
 
 void Recieve(int fd, char buffer[]) {
 
-   struct timeval tv;
-   tv.tv_sec = 10;
-   tv.tv_usec = 0;
-   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
-
    int bEnd = 0;
 
    while(!bEnd) {
+
       memset(buffer, 0, BUFFER_LENGTH);
       int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
       if(rc <= 0) {
@@ -130,10 +126,14 @@ int main(int argc, char *argv[])
       return 0;
    }
 
+   struct timeval tv;
+   tv.tv_sec = 3;
+   tv.tv_usec = 0;
+   setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (const char*) &tv, sizeof(tv));   
+   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
 
    while(1) {
       
-
       /* send data to server */
       /*memset(buffer,0,BUFFER_LENGTH);
       strcpy(buffer,"Hello Server");*/
@@ -149,7 +149,6 @@ int main(int argc, char *argv[])
          Recieve(fd, buffer);
       }
 
-      
       /*
       printf("Wait for ack from server ...\n");
       memset(buffer,0,BUFFER_LENGTH);
@@ -157,7 +156,6 @@ int main(int argc, char *argv[])
       if(rc > 0) {
          printf("Data from server : %s\n", buffer);
       }*/
-
       sleep(3);
    }
 
