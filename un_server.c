@@ -197,8 +197,8 @@ int main()
                   struct timeval tv;
                   tv.tv_sec = 3;
                   tv.tv_usec = 0;
-                  setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (const char*) &tv, sizeof(tv));   
-                  setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));   
+                  setsockopt(acceptfd, SOL_SOCKET, SO_SNDTIMEO, (const char*) &tv, sizeof(tv));   
+                  setsockopt(acceptfd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));   
                }
             }  
             else /* handle connected client */
