@@ -8,7 +8,7 @@
 
 #define SERVER_PATH     "/tmp/server"
 #define BUFFER_LENGTH    1024
-#define FALSE              0
+#define FALSE            0
 
 fd_set master; 
 fd_set read_fds; 
@@ -52,8 +52,8 @@ void func1(int fd)
          printf("[%s] timeout\n", __FUNCTION__);
       }
       else {
-         buffer[rc+1] = '\0';
-         printf("[%s] system time = %s\n", __FUNCTION__,buffer);
+         buffer[rc] = '\0';
+         printf("[%s] system time = %s\n", __FUNCTION__, buffer);
          
          /*memset(buffer, 0, BUFFER_LENGTH);
          strcpy(buffer, "ack");
@@ -80,8 +80,8 @@ void HandleMessage(int fd, char message[])
    }
 
    /* Handle message end , send "end" to client */
-   memset(buffer,0,BUFFER_LENGTH);
-   strcpy(buffer,"end");
+   memset(buffer, 0, BUFFER_LENGTH);
+   strcpy(buffer, "end");
    rc = send(fd, buffer, strlen(buffer), 0);
    if(rc > 0) {
 
@@ -89,9 +89,9 @@ void HandleMessage(int fd, char message[])
    }
 }
 
-void Recieve(int fd, char buffer[]) 
+void Recieve(int fd) 
 {
-
+   char   buffer[BUFFER_LENGTH];
    memset(buffer, 0, BUFFER_LENGTH);
    int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
    if(rc == 0) {
@@ -203,7 +203,7 @@ int main()
             }  
             else /* handle connected client */
             {
-               Recieve(i, buffer);
+               Recieve(i);
             }          
          }
       }

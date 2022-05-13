@@ -35,14 +35,15 @@ void sighandler(int sig)
 }
 
 
-int HandleMessage(int fd, char message[], int len)
+int HandleMessage(int fd, char message[])
 {
    char buffer[BUFFER_LENGTH];
    int rc;
    if(strcmp("getsystemtime", message) == 0)
    {
-      strcpy(buffer,"systime=100");
-      rc = send(fd, buffer, strlen(buffer), 0);
+      strcpy(buffer,"100");
+      buffer[3] = '\0';
+      rc = send(fd, buffer, BUFFER_LENGTH, 0);
       if(rc > 0) {
          printf("[%s] send message %s to server\n", __FUNCTION__, buffer);
       }
@@ -68,8 +69,9 @@ int HandleMessage(int fd, char message[], int len)
    }
 }
 
-void Recieve(int fd, char buffer[]) {
+void Recieve(int fd) {
 
+   char buffer[BUFFER_LENGTH];
    int bEnd = 0;
 
    while(!bEnd) {
@@ -78,14 +80,14 @@ void Recieve(int fd, char buffer[]) {
       int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
       if(rc <= 0) {
          
-         printf("[%s] recv nothing or timeout\n", __FUNCTION__);
+         printf("[%s] recv nothing or timeout [rc=%d]\n", __FUNCTION__, rc);
          bEnd = 1;
 
       } else if (rc > 0) {
 
          buffer[rc] = '\0';
          printf("recv %s from server[%d]\n", buffer, fd);        
-         bEnd = HandleMessage(fd, buffer, rc);
+         bEnd = HandleMessage(fd, buffer);
          if(bEnd == 1) {
             printf("[%s] Server send end\n", __FUNCTION__);
          }
@@ -146,7 +148,7 @@ int main(int argc, char *argv[])
       if(rc > 0) {
          buffer[rc-1] = '\0';
          printf("send %s to server success\n", buffer);
-         Recieve(fd, buffer);
+         Recieve(fd);
       }
 
       /*
