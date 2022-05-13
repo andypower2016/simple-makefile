@@ -90,7 +90,7 @@ void Recieve(int fd, char buffer[]) {
 
    } else if (rc > 0) {
 
-      buffer[rc+1] = '\0';
+      buffer[rc-1] = '\0';
       printf("Server recv %s from client[%d]\n", buffer, fd);   
       
       HandleMessage(fd, buffer, rc);
