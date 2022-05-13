@@ -58,7 +58,7 @@ int HandleMessage(int fd, char message[], int len)
    }
    else if(strcmp("end", message) == 0)
    {
-      
+
       return 1; /* end */
    }
    else
@@ -71,7 +71,7 @@ int HandleMessage(int fd, char message[], int len)
 void Recieve(int fd, char buffer[]) {
 
    struct timeval tv;
-   tv.tv_sec = 2;
+   tv.tv_sec = 10;
    tv.tv_usec = 0;
    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
 
@@ -82,13 +82,17 @@ void Recieve(int fd, char buffer[]) {
       int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
       if(rc <= 0) {
          
-         printf("[%s] recv nothing\n", __FUNCTION__);
-        
+         printf("[%s] recv nothing or timeout\n", __FUNCTION__);
+         bEnd = 1;
+
       } else if (rc > 0) {
 
          buffer[rc] = '\0';
          printf("recv %s from server[%d]\n", buffer, fd);        
          bEnd = HandleMessage(fd, buffer, rc);
+         if(bEnd == 1) {
+            printf("[%s] Server send end\n", __FUNCTION__);
+         }
       }
    }
    
