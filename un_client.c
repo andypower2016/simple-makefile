@@ -34,6 +34,50 @@ void sighandler(int sig)
    exit(1);
 }
 
+
+void HandleMessage(int fd, char message[], int len)
+{
+   char buffer[BUFFER_LENGTH];
+   int rc;
+   if(strcmp("getsystemtime", message) == 0)
+   {
+      strcpy(buffer,"systime=100");
+      rc = send(fd, buffer, strlen(buffer), 0);
+      if(rc > 0) {
+         printf("[%s] send message %s to server\n", __FUNCTION__, buffer);
+      }
+
+      memset(buffer,0,sizeof(buffer));
+      rc = recv(fd, buffer, 0);
+      buffer[rc+1] = '\0';
+      if(rc > 0 && (strcmp(buffer, "ack") == 0 ))
+      {
+         printf("[%s] recv ack from server\n",__FUNCTION__);
+      }
+   }
+   else
+   {
+      printf("[%s] not recognized message\n",__FUNCTION__);
+   }
+}
+
+void Recieve(int fd, char buffer[]) {
+
+   memset(buffer, 0, BUFFER_LENGTH);
+   int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
+   if(rc == 0) {
+      
+      printf("[%s] recv nothing\n", __FUNCTION__);
+     
+   } else if (rc > 0) {
+
+      buffer[rc+1] = '\0';
+      printf("recv %s from server[%d]\n", buffer, fd);        
+      HandleMessage(fd, buffer, rc);
+
+   }
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -76,11 +120,13 @@ int main(int argc, char *argv[])
       printf("Input message ...\n");
       fgets(buffer, sizeof(buffer), stdin);
       int sendlen = strlen(buffer);
+      fflush(fd);
       rc = send(fd, buffer, sendlen, 0);
       if(rc > 0) {
          printf("send [%s] to server success\n", buffer);
       }
 
+      Recieve(fd, buffer);
       /*
       printf("Wait for ack from server ...\n");
       memset(buffer,0,BUFFER_LENGTH);
