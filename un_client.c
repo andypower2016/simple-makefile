@@ -23,6 +23,7 @@
 
 int fd = -1;
 pthread_t handleRecvThread;
+int g_end = 0;
 
 void CloseSocket()
 {
@@ -34,6 +35,7 @@ void sighandler(int sig)
 {
    CloseSocket();
    pthread_join(handleRecvThread, 0);
+   g_end = 1;
    exit(1);
 }
 
@@ -50,14 +52,6 @@ int HandleMessage(int fd, char message[])
       if(rc > 0) {
          printf("[%s] send message %s to server\n", __FUNCTION__, buffer);
       }
-
-      /*memset(buffer,0,sizeof(buffer));
-      rc = recv(fd, buffer,sizeof(buffer), 0);
-      buffer[rc] = '\0';
-      if(rc > 0 && (strcmp(buffer, "ack") == 0 ))
-      {
-         printf("[%s] recv ack from server\n",__FUNCTION__);
-      }*/
       return 0;
    }
    else if(strcmp("end", message) == 0)
@@ -65,22 +59,28 @@ int HandleMessage(int fd, char message[])
 
       return 1; /* end */
    }
+   else if(strcmp("ack", message) == 0)
+   {
+      printf("[%s] recv %s from server\n",__FUNCTION__,message);
+      return 0; 
+   }
    else
    {
       printf("[%s] not recognized message\n",__FUNCTION__);
-      return 1; 
+      return 1; /* end */ 
    }
 }
 
-void Recieve(int fd) {
+int Recieve(int fd) {
 
    char buffer[BUFFER_LENGTH];
    int bEnd = 0;
-
+   int rc = 0;
+   
    while(!bEnd) {
 
       memset(buffer, 0, BUFFER_LENGTH);
-      int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
+      rc = recv(fd, buffer, BUFFER_LENGTH, 0);
       if(rc <= 0) {
          
          printf("[%s] recv nothing or timeout [rc=%d]\n", __FUNCTION__, rc);
@@ -89,14 +89,14 @@ void Recieve(int fd) {
       } else if (rc > 0) {
 
          buffer[rc] = '\0';
-         printf("recv %s from server[%d]\n", buffer, fd);        
+         printf("recv %s from server[%d], rc=%d\n", buffer, fd, rc);        
          bEnd = HandleMessage(fd, buffer);
          if(bEnd == 1) {
             printf("[%s] Server send end\n", __FUNCTION__);
          }
       }
    }
-   
+   return rc;
 }
 
 
@@ -104,18 +104,30 @@ void Recieve(int fd) {
 void OnRecieve(void *param)
 {
    int socket = *(int*) param;
+   int fdmax;
    int rc;
    printf("[%s] start, socket=%d\n",__FUNCTION__, socket);
-
+   
    fd_set readfds;
    FD_ZERO(&readfds);
    FD_SET(socket, &readfds);
-   while(1) {
-      rc = select(socket, &read_fds, NULL, NULL, NULL);
+   fdmax = socket;
+   while(!g_end) {
+      printf("[%s] select\n",__FUNCTION__);
+      rc = select(fdmax+1, &readfds, NULL, NULL, NULL);
       if(FD_ISSET(socket, &readfds))
       {
-         printf("[%s] socket recv\n",__FUNCTION__);
-         Recieve(socket);
+         if(rc > 0) {
+            printf("[%s] socket recv\n",__FUNCTION__);
+            rc = Recieve(socket);
+            if(rc <= 0) {
+              /* server close connection */
+	      printf("Server[%d] closed connection\n", fd);
+	      close(fd);
+	      FD_CLR(fd, &readfds); 
+	      g_end = 1;
+            }
+         }
       }
    }
 }
@@ -150,6 +162,8 @@ int main(int argc, char *argv[])
       close(fd);
       return 0;
    }
+   
+   printf("fd=%d\n",fd);
 
    struct timeval tv;
    tv.tv_sec = 3;

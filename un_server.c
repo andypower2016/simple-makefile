@@ -53,7 +53,13 @@ void func1(int fd)
       }
       else {
          buffer[rc] = '\0';
-         printf("[%s] system time = %s\n", __FUNCTION__, buffer);
+         printf("[%s] system time = %s , rc=%d\n", __FUNCTION__, buffer, rc);
+         
+         // send ack to client
+         memset(buffer, 0, BUFFER_LENGTH);
+         strcpy(buffer,"ack");
+         //send(fd, buffer, strlen(buffer),0);
+         //sleep(1);
       }
    }
 }
@@ -92,7 +98,7 @@ void HandleMessage(int fd, char message[])
 
 void Recieve(int fd) 
 {
-   char   buffer[BUFFER_LENGTH];
+   char buffer[BUFFER_LENGTH];
    memset(buffer, 0, BUFFER_LENGTH);
    int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
    if(rc == 0) {
@@ -109,7 +115,7 @@ void Recieve(int fd)
       HandleMessage(fd, buffer);
 
    }
-   else {
+   else if(rc < 0){
       printf("[%s] recv timeout\n", __FUNCTION__);
    }
 }
@@ -194,7 +200,7 @@ int main()
                   printf("New connection from client[%d]\n", acceptfd);
 
                   struct timeval tv;
-                  tv.tv_sec = 1;
+                  tv.tv_sec = 5;
                   tv.tv_usec = 0;
                   setsockopt(acceptfd, SOL_SOCKET, SO_SNDTIMEO, (const char*) &tv, sizeof(tv));   
                   setsockopt(acceptfd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));   
