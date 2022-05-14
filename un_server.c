@@ -1,3 +1,5 @@
+/* Server program using AF_UNIX address family */
+/* Headers */
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>

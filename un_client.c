@@ -1,10 +1,5 @@
-/**************************************************************************/
-/* This sample program provides code for a client application that uses     */
-/* AF_UNIX address family                                                 */
-/**************************************************************************/
-/**************************************************************************/
-/* Header files needed for this sample program                            */
-/**************************************************************************/
+/* Client program using AF_UNIX address family */
+/* Headers */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,9 +9,8 @@
 #include <signal.h>
 #include <time.h>
 #include <pthread.h>
-/**************************************************************************/
-/* Constants used by this program                                         */
-/**************************************************************************/
+
+
 #define SERVER_PATH     "/tmp/server"
 #define BUFFER_LENGTH    1024
 #define FALSE              0
