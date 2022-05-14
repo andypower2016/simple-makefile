@@ -1,0 +1,70 @@
+
+struct Command {
+	uint32_t devIdx;
+    uint32_t len;
+    uint32_t cmdID;
+    uint8_t buffer[];
+}
+
+struct RXBuffer {
+	
+	enum dataType ; // systemTime ... etc
+	uint32_t datalen;
+	uint8_t data[4096];
+}
+
+
+----> select
+-------> RecieveCommand
+------------> HandleCommand
+-----------------> InitDevice
+----------------------
+----------------------
+----------------------
+--------------------> getSystemTime
+-----------------------------> B2ISendRequest
+-------------------------------------> HandleCommand
+--------------------> return
+----------------------
+----------------------
+--------------------> startTimer
+-----------------------------> B2ISendRequest
+-------------------------------------> HandleCommand
+--------------------> return
+-----------------> InitDevice return
+------------> HandleCommand return
+--------> Send End Command  
+-------> RecieveCommand return
+----> select
+
+
+HandleCommand(struct Command*, struct RXBuffer*)
+{
+	switch(cmdID) {
+	    case  0:  // InitDevice
+	        InitDevice
+	    case  1:  // Recv Systemtime
+             RXBuffer->data = systime
+
+        case  2: // Ack
+             // do nothing
+	}
+	return 1;
+}
+
+
+B2ISendRequest (int fd, struct *Command, struct RXBuffer){
+	// send getsystime or startimer cmd
+	
+	// set recv timeout
+
+	// recv system time
+    while(bEnd) {
+
+    	rc = recv(fd, buf, sizeof buf, 0);
+    	if(rc > 0)
+    	  bEnd = HandleCommand(struct *Command, struct RXBuffer*)
+    	else
+    	  // timeout or recv fail
+    }
+}
