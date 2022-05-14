@@ -65,7 +65,7 @@ int HandleMessage(int fd, char message[])
    else
    {
       printf("[%s] not recognized message\n",__FUNCTION__);
-      return 1; /* end */
+      return 1; 
    }
 }
 

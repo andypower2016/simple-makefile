@@ -1,12 +1,12 @@
 
 struct Command {
-	uint32_t devIdx;
+    uint32_t devIdx;
     uint32_t len;
     uint32_t cmdID;
     uint8_t buffer[];
 }
 
-struct RXBuffer {
+struct RxBuffer {
 	
 	enum dataType ; // systemTime ... etc
 	uint32_t datalen;
@@ -22,14 +22,14 @@ struct RXBuffer {
 ----------------------
 ----------------------
 --------------------> getSystemTime
------------------------------> B2ISendRequest
--------------------------------------> HandleCommand
+-----------------------------> WrapperSendRequest
+-------------------------------------> HandleResponse
 --------------------> return
 ----------------------
 ----------------------
 --------------------> startTimer
------------------------------> B2ISendRequest
--------------------------------------> HandleCommand
+-----------------------------> WrapperSendRequest
+-------------------------------------> HandleResponse
 --------------------> return
 -----------------> InitDevice return
 ------------> HandleCommand return
@@ -38,24 +38,26 @@ struct RXBuffer {
 ----> select
 
 
-HandleCommand(struct Command*, struct RXBuffer*)
+HandleCommand(struct Command*)
 {
+	// dissect Command 
+	
 	switch(cmdID) {
 	    case  0:  // InitDevice
 	        InitDevice
 	    case  1:  // Recv Systemtime
              RXBuffer->data = systime
 
-        case  2: // Ack
+         case  2: // Ack
              // do nothing
 	}
 	return 1;
 }
 
 
-B2ISendRequest (int fd, struct *Command, struct RXBuffer){
+B2ISendRequest (int fd, struct *Command, struct RxBuffer*){
 	// send getsystime or startimer cmd
-	
+
 	// set recv timeout
 
 	// recv system time
