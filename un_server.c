@@ -54,10 +54,6 @@ void func1(int fd)
       else {
          buffer[rc] = '\0';
          printf("[%s] system time = %s\n", __FUNCTION__, buffer);
-         
-         /*memset(buffer, 0, BUFFER_LENGTH);
-         strcpy(buffer, "ack");
-         send(fd, buffer, strlen(buffer), 0);*/
       }
    }
 }

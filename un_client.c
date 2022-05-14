@@ -13,6 +13,7 @@
 #include <sys/un.h>
 #include <signal.h>
 #include <time.h>
+#include <pthread.h>
 /**************************************************************************/
 /* Constants used by this program                                         */
 /**************************************************************************/
@@ -21,6 +22,7 @@
 #define FALSE              0
 
 int fd = -1;
+pthread_t handleRecvThread;
 
 void CloseSocket()
 {
@@ -31,6 +33,7 @@ void CloseSocket()
 void sighandler(int sig)
 {
    CloseSocket();
+   pthread_join(handleRecvThread, 0);
    exit(1);
 }
 
@@ -96,13 +99,33 @@ void Recieve(int fd) {
    
 }
 
+
+
+void OnRecieve(void *param)
+{
+   int socket = *(int*) param;
+   int rc;
+   printf("[%s] start, socket=%d\n",__FUNCTION__, socket);
+
+   fd_set readfds;
+   FD_ZERO(&readfds);
+   FD_SET(socket, &readfds);
+   while(1) {
+      rc = select(socket, &read_fds, NULL, NULL, NULL);
+      if(FD_ISSET(socket, &readfds))
+      {
+         printf("[%s] socket recv\n",__FUNCTION__);
+         Recieve(socket);
+      }
+   }
+}
+
 int main(int argc, char *argv[])
 {
 
    int    rc;
    char   buffer[BUFFER_LENGTH];
    struct sockaddr_un serveraddr;
-
    signal(SIGINT, sighandler);
   
    fd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -134,6 +157,9 @@ int main(int argc, char *argv[])
    setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (const char*) &tv, sizeof(tv));   
    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));
 
+   // create pthread handle recv
+   pthread_create(&handleRecvThread, 0, OnRecieve, (void*) &fd);
+
    while(1) {
       
       /* send data to server */
@@ -148,7 +174,7 @@ int main(int argc, char *argv[])
       if(rc > 0) {
          buffer[rc-1] = '\0';
          printf("send %s to server success\n", buffer);
-         Recieve(fd);
+         //Recieve(fd);
       }
 
       /*
@@ -158,12 +184,13 @@ int main(int argc, char *argv[])
       if(rc > 0) {
          printf("Data from server : %s\n", buffer);
       }*/
-      while(recv(fd, buffer, BUFFER_LENGTH, 0)>=0) {
+      /*while(recv(fd, buffer, BUFFER_LENGTH, 0)>=0) {
         
-      }
+      }*/
    }
 
    CloseSocket();
+   pthread_join(handleRecvThread, 0);
 
    return 0;
 }
