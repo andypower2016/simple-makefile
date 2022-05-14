@@ -82,6 +82,7 @@ void HandleMessage(int fd, char message[])
       printf("[%s] not recognized message\n",__FUNCTION__);
       return;
    }
+   
 
    /* Handle message end , send "end" to client */
    memset(buffer, 0, BUFFER_LENGTH);
@@ -107,12 +108,10 @@ void Recieve(int fd)
    } else if (rc > 0) {
 
       buffer[rc-1] = '\0';
-      printf("Server recv %s from client[%d]\n", buffer, fd);   
-      
+      printf("Server recv %s from client[%d], rc=%d\n", buffer, fd, rc);   
+          
       HandleMessage(fd, buffer);
-      /*memset(buffer,0,BUFFER_LENGTH);
-      strcpy(buffer,"server ack");
-      send(i, buffer, BUFFER_LENGTH, 0);*/
+
    }
    else {
       printf("[%s] recv timeout\n", __FUNCTION__);
@@ -199,7 +198,7 @@ int main()
                   printf("New connection from client[%d]\n", acceptfd);
 
                   struct timeval tv;
-                  tv.tv_sec = 3;
+                  tv.tv_sec = 1;
                   tv.tv_usec = 0;
                   setsockopt(acceptfd, SOL_SOCKET, SO_SNDTIMEO, (const char*) &tv, sizeof(tv));   
                   setsockopt(acceptfd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &tv, sizeof(tv));   

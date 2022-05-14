@@ -158,7 +158,9 @@ int main(int argc, char *argv[])
       if(rc > 0) {
          printf("Data from server : %s\n", buffer);
       }*/
-      sleep(3);
+      while(recv(fd, buffer, BUFFER_LENGTH, 0)>=0) {
+        
+      }
    }
 
    CloseSocket();
