@@ -73,6 +73,10 @@ void HandleMessage(int fd, char message[])
       printf("[%s] get message %s\n", __FUNCTION__, message);
       func1(fd);
    }
+   else if(strcmp("ack", message) == 0)
+   {
+      printf("[%s] get message %s\n", __FUNCTION__, message);
+   }
    else
    {
       printf("[%s] not recognized message\n",__FUNCTION__);
