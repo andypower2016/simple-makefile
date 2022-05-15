@@ -40,6 +40,8 @@ int HandleMessage(int fd, char message[])
 {
    char buffer[BUFFER_LENGTH];
    int rc;
+
+   printf("[%s] recv %s from server\n",__FUNCTION__,message);
    if(strcmp("getsystemtime", message) == 0)
    {
       strcpy(buffer,"100");
@@ -52,12 +54,10 @@ int HandleMessage(int fd, char message[])
    }
    else if(strcmp("end", message) == 0)
    {
-
       return 1; /* end */
    }
    else if(strcmp("ack", message) == 0)
    {
-      printf("[%s] recv %s from server\n",__FUNCTION__,message);
       return 0; 
    }
    else
@@ -87,9 +87,6 @@ int Recieve(int fd) {
          buffer[rc] = '\0';
          printf("recv %s from server[%d], rc=%d\n", buffer, fd, rc);        
          bEnd = HandleMessage(fd, buffer);
-         if(bEnd == 1) {
-            printf("[%s] Server send end\n", __FUNCTION__);
-         }
       }
    }
    return rc;
