@@ -1,6 +1,7 @@
 /* Client program using AF_UNIX address family */
 /* Headers */
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -10,6 +11,7 @@
 #include <time.h>
 #include <pthread.h>
 
+#include "cmd.h"
 
 #define SERVER_PATH     "/tmp/server"
 #define BUFFER_LENGTH    1024
@@ -131,6 +133,7 @@ int main(int argc, char *argv[])
 
    int    rc;
    char   buffer[BUFFER_LENGTH];
+   int sendlen;
    struct sockaddr_un serveraddr;
    signal(SIGINT, sighandler);
   
@@ -170,31 +173,21 @@ int main(int argc, char *argv[])
 
    while(1) {
       
-      /* send data to server */
-      /*memset(buffer,0,BUFFER_LENGTH);
-      strcpy(buffer,"Hello Server");*/
-      printf("Input message ...\n");
+      /* send cmd to server */
+      printf("Input cmd ...\n");
       memset(buffer,0,BUFFER_LENGTH);
       fgets(buffer, sizeof(buffer), stdin);
-      int sendlen = strlen(buffer);
-      //fflush(fd);
+
+      cmd sendCmd={0};
+      sendCmd.cmdID = atoi(buffer);
+      memcpy(buffer, (char*)&sendCmd, sizeof(cmd));
+      sendlen = sizeof(cmd);
       rc = send(fd, buffer, sendlen, 0);
       if(rc > 0) {
-         buffer[rc-1] = '\0';
+         //buffer[rc-1] = '\0';
          printf("send %s to server success\n", buffer);
          //Recieve(fd);
       }
-
-      /*
-      printf("Wait for ack from server ...\n");
-      memset(buffer,0,BUFFER_LENGTH);
-      rc = recv(fd, buffer, BUFFER_LENGTH, 0);
-      if(rc > 0) {
-         printf("Data from server : %s\n", buffer);
-      }*/
-      /*while(recv(fd, buffer, BUFFER_LENGTH, 0)>=0) {
-        
-      }*/
    }
 
    CloseSocket();

@@ -1,12 +1,15 @@
 /* Server program using AF_UNIX address family */
 /* Headers */
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <signal.h>
 #include <time.h>
+
+#include "cmd.h"
 
 #define SERVER_PATH     "/tmp/server"
 #define BUFFER_LENGTH    1024
@@ -98,11 +101,42 @@ void HandleMessage(int fd, char message[])
    }
 }
 
+
+void HandleMessageByCmd(int fd, int cmdID)
+{
+   char buffer[BUFFER_LENGTH];
+   int rc;
+
+   if(cmdID == 125)
+   {
+      func1(fd);
+   }
+   else
+   {
+      printf("[%s] not recognized cmdID\n",__FUNCTION__);
+      return;
+   }
+   
+
+   /* Handle cmd end , send "end" to client */
+   memset(buffer, 0, BUFFER_LENGTH);
+   strcpy(buffer, "end");
+   rc = send(fd, buffer, strlen(buffer), 0);
+   if(rc > 0) {
+
+      printf("[%s] send %s to client[%d]\n", __FUNCTION__, buffer, fd);
+   }
+}
+
 void Recieve(int fd) 
 {
    char buffer[BUFFER_LENGTH];
+   int rc;
+   cmd *recvCmd = NULL;
+   
+   
    memset(buffer, 0, BUFFER_LENGTH);
-   int rc = recv(fd, buffer, BUFFER_LENGTH, 0);
+   rc = recv(fd, buffer, BUFFER_LENGTH, 0);
    if(rc == 0) {
       /* client close connection */
       printf("Client[%d] closed connection\n", fd);
@@ -111,10 +145,15 @@ void Recieve(int fd)
 
    } else if (rc > 0) {
 
+/*
       buffer[rc-1] = '\0';
-      printf("Server recv %s from client[%d], rc=%d\n", buffer, fd, rc);   
-          
+      printf("Server recv %s from client[%d], rc=%d\n", buffer, fd, rc);    
       HandleMessage(fd, buffer);
+*/      
+      printf("Server recv %d bytes from client[%d]\n", rc, fd);    
+      recvCmd = (cmd*) buffer;
+      printf("recvCmd=%d\n", recvCmd->cmdID);
+      HandleMessageByCmd(fd, recvCmd->cmdID);
 
    }
    else if(rc < 0){
