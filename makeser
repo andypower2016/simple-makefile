@@ -1,6 +1,0 @@
-CC := gcc
-
-all:
-	$(CC) un_server.c -o ser
-	$(CC) un_client.c -o cli
-	
