@@ -36,104 +36,73 @@ void sighandler(int sig)
    CloseServer();
 }
 
+
+
+void HandleResponse(int fd, RxBuffer* rxBuffer)
+{
+   char buffer[BUFFER_LENGTH];
+   int rc;
+   rc = recv(fd, buffer, BUFFER_LENGTH, 0);
+   cmd* recvCmd = 0;
+   
+   if(rc <= 0) {
+     printf("[%s] timeout\n", __FUNCTION__);
+   }
+   else {
+     recvCmd = (cmd*) buffer;
+     switch(recvCmd->cmdID)
+     {
+      case CMD_ID_SYSTIME:
+           {
+		printf("[%s] recv system time=%u\n",__FUNCTION__,*(uint32_t*)recvCmd->buffer);
+           }
+           break;
+      default:
+           printf("recv cmd not recognized\n");
+           break;
+     }	
+   }
+}
+
 void func1(int fd)
 {
    char buffer[BUFFER_LENGTH];
    int rc;
    int count = 3;
-
+   
    while(count--)
    {
-      /* send get sys time */
-      memset(buffer, 0, BUFFER_LENGTH);
-      strcpy(buffer, "getsystemtime");
-      send(fd, buffer, strlen(buffer), 0);
-      
-      /* recv */
-      memset(buffer, 0, BUFFER_LENGTH);
-      rc = recv(fd, buffer, BUFFER_LENGTH, 0);
-
-      if(rc <= 0) {
-         printf("[%s] timeout\n", __FUNCTION__);
-      }
-      else {
-         buffer[rc] = '\0';
-         printf("[%s] system time = %s , rc=%d\n", __FUNCTION__, buffer, rc);
-         
-         // send ack to client
-         memset(buffer, 0, BUFFER_LENGTH);
-         strcpy(buffer,"ack");
-         //send(fd, buffer, strlen(buffer),0);
-         //sleep(1);
-      }
+      RxBuffer rxBuffer = {0};    
+      SendCommand(fd, CMD_ID_GETSYSTIME, 0,0); 
+      HandleResponse(fd, &rxBuffer); 
    }
 }
 
 
-void HandleMessage(int fd, char message[])
+int HandleCommand(int fd, char buffer[])
 {
-   char buffer[BUFFER_LENGTH];
-   int rc;
+   cmd *recvCmd = NULL;
+   recvCmd = (cmd*) buffer;
+   printf("[%s] Handle cmd %d \n", __FUNCTION__, recvCmd->cmdID);
 
-   if(strcmp("func1", message) == 0)
+   switch(recvCmd->cmdID)
    {
-      printf("[%s] get message %s\n", __FUNCTION__, message);
-      func1(fd);
-   }
-   else if(strcmp("ack", message) == 0)
-   {
-      printf("[%s] get message %s\n", __FUNCTION__, message);
-   }
-   else
-   {
-      printf("[%s] not recognized message\n",__FUNCTION__);
-      return;
-   }
-   
-
-   /* Handle message end , send "end" to client */
-   memset(buffer, 0, BUFFER_LENGTH);
-   strcpy(buffer, "end");
-   rc = send(fd, buffer, strlen(buffer), 0);
-   if(rc > 0) {
-
-      printf("[%s] send %s to client[%d]\n", __FUNCTION__, buffer, fd);
-   }
-}
-
-
-void HandleMessageByCmd(int fd, int cmdID)
-{
-   char buffer[BUFFER_LENGTH];
-   int rc;
-
-   if(cmdID == 125)
-   {
-      func1(fd);
-   }
-   else
-   {
-      printf("[%s] not recognized cmdID\n",__FUNCTION__);
-      return;
-   }
-   
-
-   /* Handle cmd end , send "end" to client */
-   memset(buffer, 0, BUFFER_LENGTH);
-   strcpy(buffer, "end");
-   rc = send(fd, buffer, strlen(buffer), 0);
-   if(rc > 0) {
-
-      printf("[%s] send %s to client[%d]\n", __FUNCTION__, buffer, fd);
-   }
+      case CMD_ID_FUNC1:
+           {
+	      func1(fd);	
+           }
+           break;
+      default:
+           printf("recv cmd not recognized\n");
+           break;
+   }	
+   return 0;
 }
 
 void Recieve(int fd) 
 {
    char buffer[BUFFER_LENGTH];
    int rc;
-   cmd *recvCmd = NULL;
-   
    
    memset(buffer, 0, BUFFER_LENGTH);
    rc = recv(fd, buffer, BUFFER_LENGTH, 0);
@@ -144,17 +113,10 @@ void Recieve(int fd)
       FD_CLR(fd, &master); 
 
    } else if (rc > 0) {
-
-/*
-      buffer[rc-1] = '\0';
-      printf("Server recv %s from client[%d], rc=%d\n", buffer, fd, rc);    
-      HandleMessage(fd, buffer);
-*/      
+   
       printf("Server recv %d bytes from client[%d]\n", rc, fd);    
-      recvCmd = (cmd*) buffer;
-      printf("recvCmd=%d\n", recvCmd->cmdID);
-      HandleMessageByCmd(fd, recvCmd->cmdID);
-
+      HandleCommand(fd, buffer);
+      SendCommand(fd, CMD_ID_END, 0, 0);    
    }
    else if(rc < 0){
       printf("[%s] recv timeout\n", __FUNCTION__);

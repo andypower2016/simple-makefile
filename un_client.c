@@ -35,41 +35,36 @@ void sighandler(int sig)
    exit(1);
 }
 
-
-int HandleMessage(int fd, char message[])
+int HandleCommand(int fd, char buffer[])
 {
-   char buffer[BUFFER_LENGTH];
-   int rc;
-
-   printf("[%s] recv %s from server\n",__FUNCTION__,message);
-   if(strcmp("getsystemtime", message) == 0)
+   cmd* recvCmd = (cmd*) buffer;
+   int sendlen = 0;
+   uint8_t *data = 0;
+   int rc = 0;
+   
+   printf("[%s] Handle cmd %d \n", __FUNCTION__, recvCmd->cmdID);
+   switch(recvCmd->cmdID)
    {
-      strcpy(buffer,"100");
-      buffer[3] = '\0';
-      rc = send(fd, buffer, BUFFER_LENGTH, 0);
-      if(rc > 0) {
-         printf("[%s] send message %s to server\n", __FUNCTION__, buffer);
-      }
-      return 0;
+      case CMD_ID_GETSYSTIME:
+           {
+                uint32_t sysTime = 102;
+                sendlen = sizeof(cmd)+sizeof(uint32_t);
+                SendCommand(fd, CMD_ID_SYSTIME, (char*)&sysTime, sizeof(uint32_t));
+           }
+      case CMD_ID_END:
+           
+           return 1;
+      default:
+           printf("recv cmd not recognized\n");
+           return 0;
    }
-   else if(strcmp("end", message) == 0)
-   {
-      return 1; /* end */
-   }
-   else if(strcmp("ack", message) == 0)
-   {
-      return 0; 
-   }
-   else
-   {
-      printf("[%s] not recognized message\n",__FUNCTION__);
-      return 1; /* end */ 
-   }
+   return 0;
 }
 
 int Recieve(int fd) {
 
    char buffer[BUFFER_LENGTH];
+   cmd* recvCmd;
    int bEnd = 0;
    int rc = 0;
    
@@ -84,14 +79,17 @@ int Recieve(int fd) {
 
       } else if (rc > 0) {
 
+<<<<<<< HEAD
          buffer[rc] = '\0';
          printf("recv %s from server[%d], rc=%d\n", buffer, fd, rc);        
          bEnd = HandleMessage(fd, buffer);
+=======
+         bEnd = HandleCommand(fd, buffer);         
+>>>>>>> add functions for cmd handling
       }
    }
    return rc;
 }
-
 
 
 void OnRecieve(void *param)
@@ -180,10 +178,8 @@ int main(int argc, char *argv[])
       memcpy(buffer, (char*)&sendCmd, sizeof(cmd));
       sendlen = sizeof(cmd);
       rc = send(fd, buffer, sendlen, 0);
-      if(rc > 0) {
-         //buffer[rc-1] = '\0';
-         printf("send %s to server success\n", buffer);
-         //Recieve(fd);
+      if(rc > 0) {         
+         //printf("send %s to server success\n", buffer);
       }
    }
 
