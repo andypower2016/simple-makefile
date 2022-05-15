@@ -79,13 +79,7 @@ int Recieve(int fd) {
 
       } else if (rc > 0) {
 
-<<<<<<< HEAD
-         buffer[rc] = '\0';
-         printf("recv %s from server[%d], rc=%d\n", buffer, fd, rc);        
-         bEnd = HandleMessage(fd, buffer);
-=======
          bEnd = HandleCommand(fd, buffer);         
->>>>>>> add functions for cmd handling
       }
    }
    return rc;
