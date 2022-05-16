@@ -48,7 +48,7 @@ int HandleCommand(int fd, char buffer[])
       case CMD_ID_GETSYSTIME:
            {
                 uint32_t sysTime = 102;
-                sendlen = sizeof(cmd)+sizeof(uint32_t);
+                sendlen = sizeof(cmd) + sizeof(uint32_t);
                 SendCommand(fd, CMD_ID_SYSTIME, (char*)&sysTime, sizeof(uint32_t));
            }
       case CMD_ID_END:
@@ -77,7 +77,8 @@ int Recieve(int fd) {
          printf("[%s] recv nothing or timeout [rc=%d]\n", __FUNCTION__, rc);
          bEnd = 1;
 
-      } else if (rc > 0) {
+      } 
+      else if (rc > 0) {
 
          bEnd = HandleCommand(fd, buffer);         
       }
@@ -98,6 +99,7 @@ void OnRecieve(void *param)
    FD_SET(socket, &readfds);
    fdmax = socket;
    while(!g_end) {
+
       printf("[%s] select\n",__FUNCTION__);
       rc = select(fdmax+1, &readfds, NULL, NULL, NULL);
       if(FD_ISSET(socket, &readfds))
@@ -106,14 +108,15 @@ void OnRecieve(void *param)
             printf("[%s] socket recv\n",__FUNCTION__);
             rc = Recieve(socket);
             if(rc <= 0) {
-              /* server close connection */
-	      printf("Server[%d] closed connection\n", fd);
-	      close(fd);
-	      FD_CLR(fd, &readfds); 
-	      g_end = 1;
+               /* server close connection */
+      	      printf("Server[%d] closed connection\n", fd);
+      	      close(fd);
+      	      FD_CLR(fd, &readfds); 
+      	      g_end = 1;
             }
          }
       }
+
    }
 }
 
