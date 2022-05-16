@@ -34,14 +34,12 @@ int SendCommand(int fd, cmdType cmdID, char* data, int datalen)
     int sendlen = sizeof(cmd) + datalen;
     cmd *sendCmd = malloc(sendlen);
     uint8_t *sendBuffer = sendCmd->buffer;
-    char buffer[BUFFER_LENGTH];
     int rc = 0;
     if(sendCmd)
     {
        sendCmd->cmdID = (uint32_t) cmdID;
        memcpy(sendBuffer, (uint8_t*) data, datalen);
-       memcpy(buffer, (char*) sendCmd, sendlen);
-       rc = send(fd, buffer, sendlen, 0);
+       rc = send(fd, (char*) sendCmd, sendlen, 0);
        if(rc > 0) {
          printf("[%s] sendCmd=%d\n",__FUNCTION__,cmdID);
        }
