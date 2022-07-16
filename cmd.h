@@ -7,7 +7,7 @@
 
 #define BUFFER_LENGTH 4096
 
-/// ccc
+/// cc
 typedef struct cmd {
 
 char name[4];
