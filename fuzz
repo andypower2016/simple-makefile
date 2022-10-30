@@ -6,4 +6,7 @@
     export PATH=$PATH:/home/ccc/honggfuzz_test/honggfuzz/hfuzz_cc/:home/ccc/honggfuzz_test/honggfuzz/
     
     hfuzz-clang++ -g -O3 main.cc -o main
+    
+    
     honggfuzz -P -z -q --run_time 10 -i ./ -- ./main
+    honggfuzz -P -z --run_time 3 --threads 3 --output ./outdir -i ./ -- ./main
