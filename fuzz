@@ -1,0 +1,6 @@
+[honggfuzz]
+git clone https://github.com/google/honggfuzz.git
+sudo apt-get install binutils-dev libunwind-dev clang
+cd honggfuzz
+make
+export PATH=$PATH:/home/ccc/honggfuzz_test/honggfuzz/hfuzz_cc/:home/ccc/honggfuzz_test/honggfuzz/
