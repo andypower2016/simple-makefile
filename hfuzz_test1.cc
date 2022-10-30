@@ -9,6 +9,8 @@
 #include <ctime> 
 #include <sstream>
 #include <iomanip>
+#include <thread>
+
 
 std::ofstream outfile;
 
@@ -24,7 +26,7 @@ void func(const uint8_t *Data, size_t Size) {
     for (int i = 0 ; i < Size ; ++i)
     {
       char buffer[256];
-      sprintf(buffer, "0x%2x\n", Data[i]);
+      sprintf(buffer, "0x%02x\n", Data[i]);
       outfile << buffer;
 
       //struct data *ptr_data = NULL;
@@ -39,10 +41,9 @@ void CreateCurLogFile()
   auto tm = *std::localtime(&t);
   std::ostringstream oss;
   oss << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S");
-  auto str = oss.str();
 
   char filename[256];
-  sprintf(filename, "./myout/fout_%d_%s", getpid(), str.c_str());
+  sprintf(filename, "./myout/fout_%d_%d_%s", getpid(), std::hash<std::thread::id>{}(std::this_thread::get_id()), oss.str().c_str());
   outfile.open(filename, std::ofstream::out);
 }
 
